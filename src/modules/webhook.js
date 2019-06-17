@@ -15,6 +15,7 @@ module.exports.setup = (app, db) => {
                 }
             }
         })
+        console.log(response)
         return !!response
     }
 
@@ -38,6 +39,10 @@ module.exports.setup = (app, db) => {
                         event.message.text === 'hi' || event.message.text === 'hey') {
                             await replyToSender(sender, 'What is your first name ? ')
                             await replyToSender(sender, 'When is your birthday ?')
+                        }
+
+                        if (event.message.text === 'no') {
+                            replyToSender(sender, 'Good Bye')
                         }
 
                         const data = {

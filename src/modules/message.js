@@ -2,6 +2,19 @@
 const Response = require('../utils/response')
 const common = require('../utils/common')
 module.exports.setup = (app, db) => {
+    /**
+    * @swagger
+    * /message:
+    *   get:
+    *     description: Get Message With pagination
+    *     tags:
+    *      - Get Message all
+    *     produces:
+    *      - application/json
+    *     responses:
+    *       200:
+    *         description: message data
+    */
     app.get('/messages', async (req, res) => {
         try {
             const page = (req.query && req.query.page) ? req.query.page : 1
@@ -17,6 +30,26 @@ module.exports.setup = (app, db) => {
         }
     })
 
+    /**
+    * @swagger
+    * /message/:id:
+    *   get:
+    *     description: Get Message With Id
+    *     tags:
+    *      - Get Message With Id
+    *     parameters:
+    *       - name: id
+    *         description: message data id
+    *         in: path
+    *         type: integer
+    *         required: true
+    *         example: 1
+    *     produces:
+    *      - application/json
+    *     responses:
+    *       200:
+    *         description: message data
+    */
     app.get('/message/:id', async (req, res) => {
         try {
             const data = await db.query('SELECT * from message where id =? and deleted_at IS null ', [req.params.id])
@@ -29,11 +62,32 @@ module.exports.setup = (app, db) => {
         }
     })
 
+    /**
+    * @swagger
+    * /message/:id:
+    *   post:
+    *     description: Delete Message With Id
+    *     tags:
+    *      - Delete Message With Id
+    *     parameters:
+    *       - name: id
+    *         description: message data id
+    *         in: path
+    *         type: integer
+    *         required: true
+    *         example: 1
+    *     produces:
+    *      - application/json
+    *     responses:
+    *       200:
+    *         description: message data
+    */
     app.post('/message/:id', (req, res) => {
-        const data = db.query('update  message set deleted_at = ? where id = ?', [common.now, req.params.id])
-        if (!data) {
-            res.json(new Response(false, 'error from server', null))
+        try {
+            db.query('update message set deleted_at = ? where id = ?', [common.now, req.params.id])
+            res.json(new Response(true, 'success', null))
+        } catch (error) {
+            return res.json(new Response(false, error.message, error))
         }
-        res.json(new Response(true, 'success', data))
     })
 }

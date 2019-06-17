@@ -31,13 +31,27 @@
 require('dotenv').config()
 const chai = require('chai')
 const chaiHttp = require('chai-http')
+// override to database test
+
+process.env['MYSQL_DATABASE'] = 'coba_test'
 const db = require('../src/config/db')
-const response = require('../src/utils/response')
 const app = require('../src/app')(db)
 const should = require('chai').should();
 
 chai.use(chaiHttp)
 describe('API TEST', function () {
+    before((done) => {
+        new Promise( async (resolve, reject) => {
+            await require('../src/schemas')(db)
+            await require('./fixtures')(db)
+            resolve(true)
+        })
+        .then(() => {
+            return done()
+        })
+    
+    })
+
     after(() => {
         process.exit()
     })
@@ -70,13 +84,25 @@ describe('API TEST', function () {
     })
 
     describe('GET messages with id ', () => {
-        it('should get message data pagination is empty', (done) => {
+        it('should get message not empty', (done) => {
             chai.request(app)
-                .get('/message/4')
+                .get('/message/15')
                 .end(function (err, res) {
                     should.equal(res.status, 200)
                     should.equal(res.body.success, true)
                     should.exist(res.body.data)
+                    done()
+                })
+        })
+    })
+
+    describe('DELETE messages with id ', () => {
+        it('should success delete message', (done) => {
+            chai.request(app)
+                .get('/message/15')
+                .end(function (err, res) {
+                    should.equal(res.status, 200)
+                    should.equal(res.body.success, true)
                     done()
                 })
         })
